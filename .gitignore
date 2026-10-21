@@ -1,0 +1,59 @@
+# Qt Creator project files (lokal, temporär)
+*.user
+*.pro.user
+*.autosave
+*.qmlproject.user*
+*.qbs.user
+*.creator.user
+*.creator
+*.files
+*.includes
+*.config
+*.creator.*.files
+*.creator.*.includes
+*.creator.*.config
+*.creator.*.user
+.git_custom/
+
+# Qt Creator / Clangd / Build Caches
+.qtc_clangd/
+.qtc_clangd-cache/
+.clangd/
+.clangd/
+.cache/
+.idea/
+.vscode/
+.ccls-cache/
+
+# Build directories (qmake, CMake, etc.)
+build*/
+Build*/
+bin/
+obj/
+doc/
+.qmake.stash
+moc_predefs.h
+.qm/
+qmake_qmake_qm_files.qrc
+*.o
+*.obj
+*.a
+*.so
+*.dll
+*.exe
+
+# Generated UI / MOC / RCC / QRC
+ui_*.h
+moc_*.cpp
+qrc_*.cpp
+
+# Local data or temp dirs
+cg.*
+Unben*
+run/*
+!run/.run
+tmp/
+temp/
+
+*.kate-swp
+*.swp

@@ -1,0 +1,93 @@
+name: build-and-test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  # Builds and runs the example program with each compiler, and renders the
+  # gnuplot PNGs to verify the example -> data -> plot pipeline.
+  example:
+    name: Example ${{ matrix.compiler }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - compiler: GCC
+            cxx: g++
+          - compiler: Clang
+            cxx: clang++
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++ clang make gnuplot
+
+      - name: Build example
+        run: make CXX=${{ matrix.cxx }}
+
+      - name: Run example and render plots
+        run: make plot CXX=${{ matrix.cxx }}
+
+      - name: Upload plots
+        uses: actions/upload-artifact@v4
+        with:
+          name: plots-${{ matrix.compiler }}
+          path: plot/*.png
+
+  # Full test suite (gcc + clang, sanitizers, debug libstdc++, coverage,
+  # gcc -fanalyzer, clang-tidy). Runs once; the suite already covers both
+  # compilers internally.
+  tests:
+    name: Test suite
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++ clang clang-tidy make
+
+      - name: Run tests
+        run: make test
+
+  windows-msys2:
+    name: Windows MSYS2 UCRT64
+    runs-on: windows-2022
+
+    defaults:
+      run:
+        shell: msys2 {0}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            git
+            make
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-gnuplot
+
+      - name: Build example
+        run: make
+
+      - name: Run example and render plots
+        run: make plot
+
+      - name: Run golden tests (gcc)
+        run: make -C tests test-gcc

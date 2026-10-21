@@ -1,0 +1,39 @@
+cff-version: 1.2.0
+message: "If you use AirfoilData, please cite the software using the Zenodo Concept DOI. For exact reproducibility, cite the version-specific DOI of the release you used."
+
+title: "AirfoilData: A C++ Library for Airfoil Data Storage, Analysis and Manipulations"
+
+authors:
+  - family-names: "Frommann"
+    given-names: "Olaf"
+    orcid: "https://orcid.org/0009-0004-2614-4392"
+
+version: "1.0.0"
+date-released: "2026-10-21"
+
+license: "GPL-3.0-or-later"
+
+repository-code: "https://github.com/of33/AirfoilData"
+url: "https://github.com/of33/AirfoilData"
+doi: "10.5281/zenodo.20548727"
+
+references:
+  - type: report
+    authors:
+      - family-names: "Frommann"
+        given-names: "Olaf"
+    title: "Thin-Airfoil Theory (Camber-Line Formulation) - Deep Documentation of a Teaching C++ Implementation"
+    version: "1.1.0"
+    date-released: "2026-01-08"
+    doi: "10.5281/zenodo.18262399"
+    url: "https://github.com/of33/TAT"
+
+  - type: report
+    authors:
+      - family-names: "Frommann"
+        given-names: "Olaf"
+    title: "Thin Airfoil Theory (Thickness Formulation) - Deep Documentation of a Teaching C++ Implementation"
+    version: "1.0.0"
+    date-released: "2026-04-13"
+    doi: "10.5281/zenodo.19546291"
+    url: "https://github.com/of33/TATT"
