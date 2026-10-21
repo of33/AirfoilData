@@ -12,7 +12,7 @@
 alt="Build and test">
 </a>
 &nbsp;&nbsp;
-<a href="https://doi.org/10.5281/zenodo.20548727"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.20548727.svg" alt="DOI"></a>
+<a href="https://doi.org/10.5281/zenodo.23547993"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.23547993.svg" alt="DOI"></a>
 &nbsp;&nbsp;
 <a href="LICENCE">
 <img src="https://img.shields.io/badge/license-GNU/GPLv3-blue"
@@ -725,7 +725,7 @@ the corresponding GitHub or Zenodo release page.
     version = {1.0.0},
     url     = {https://github.com/of33/AirfoilData}
     license      = {GPL-3.0-or-later},
-    doi          = {10.5281/zenodo.20548727}
+    doi          = {10.5281/zenodo.23547993}
 
 }
 ```

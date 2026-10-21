@@ -15,7 +15,7 @@ license: "GPL-3.0-or-later"
 
 repository-code: "https://github.com/of33/AirfoilData"
 url: "https://github.com/of33/AirfoilData"
-doi: "10.5281/zenodo.20548727"
+doi: "10.5281/zenodo.23547993"
 
 references:
   - type: report
