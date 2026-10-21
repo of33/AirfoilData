@@ -75,6 +75,16 @@ TEST_COV     := $(BINDIR)/test_airfoildata_cov
 
 COV_OBJS := $(COVDIR)/AirfoilData.o $(COVDIR)/AkimaInterpolation.o $(COVDIR)/harness_common.o $(COVDIR)/test_airfoildata.o
 
+# Sanitizer runtime probes: some platforms (e.g. MSYS2 UCRT64) ship gcc
+# without libasan/libubsan and clang without the matching compiler-rt
+# files. The sanitizer targets then report SKIP instead of failing.
+ASAN_GCC := $(shell printf 'int main(void){return 0;}' >san_probe.c && \
+    $(CXX_GCC) -fsanitize=address,undefined san_probe.c -o san_probe 2>/dev/null && echo yes; \
+    rm -f san_probe.c san_probe san_probe.exe)
+ASAN_CLANG := $(shell printf 'int main(void){return 0;}' >san_probe.c && \
+    $(CXX_CLANG) -fsanitize=address,undefined san_probe.c -o san_probe 2>/dev/null && echo yes; \
+    rm -f san_probe.c san_probe san_probe.exe)
+
 .PHONY: all full check update-golden golden-gcc golden-clang test-gcc test-clang san-gcc san-clang san-full-gcc dbg-gcc coverage analyzer tidy memcheck sharp strict clean
 
 all: test-gcc test-clang san-gcc san-clang
@@ -140,14 +150,29 @@ test-gcc: $(TEST_GCC)
 test-clang: $(TEST_CLANG)
 	$(TEST_CLANG) $(GOLDEN) $(PROFILE)
 
+ifeq ($(ASAN_GCC),yes)
 san-gcc: $(SAN_GCC)
 	$(SAN_GCC) $(GOLDEN) $(PROFILE)
+else
+san-gcc:
+	@echo "WARNING: san-gcc NOT RUN - the address/undefined sanitizer runtime (libasan/libubsan) is not installed for $(CXX_GCC)."
+endif
 
+ifeq ($(ASAN_CLANG),yes)
 san-clang: $(SAN_CLANG)
 	$(SAN_CLANG) $(GOLDEN) $(PROFILE)
+else
+san-clang:
+	@echo "WARNING: san-clang NOT RUN - the address/undefined sanitizer runtime (compiler-rt) is not installed for $(CXX_CLANG)."
+endif
 
+ifeq ($(ASAN_GCC),yes)
 san-full-gcc: $(SAN_FULL)
 	$(SAN_FULL) $(GOLDEN) $(PROFILE)
+else
+san-full-gcc:
+	@echo "WARNING: san-full-gcc NOT RUN - the address/undefined sanitizer runtime (libasan/libubsan) is not installed for $(CXX_GCC)."
+endif
 
 dbg-gcc: $(TEST_DBG)
 	$(TEST_DBG) $(GOLDEN) $(PROFILE)

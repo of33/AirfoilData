@@ -171,6 +171,25 @@ For the supplied build targets and example:
 
 The core library has no mandatory third-party runtime dependency.
 
+### Optional MSYS2 Developer Tools
+
+The core library and example do not require Clang.
+
+For the Clang and clang-tidy developer targets in MSYS2 UCRT64, install:
+
+```bash
+pacman -S --needed \
+mingw-w64-ucrt-x86_64-clang \
+mingw-w64-ucrt-x86_64-clang-tools-extra
+```
+
+These packages are not needed for ordinary library use, the core object files,
+the optional archive, or the example program.
+
+Depending on the current MSYS2 package set, the corresponding sanitizer
+runtime may still be unavailable. The test Makefile detects this and reports
+the affected target as `NOT RUN`.
+
 ---
 
 ## Quick Start
@@ -488,7 +507,7 @@ build/AkimaInterpolation.o
 
 ## Tests
 
-Run the standard test set with:
+Run the standard developer check set with:
 
 ```bash
 make test
@@ -500,9 +519,9 @@ A successful run ends with:
 TEST OVERALL: PASSED
 ```
 
-The regression harness includes:
+The regression harness includes or requests:
 
-- golden-reference comparisons,
+- golden-reference comparison,
 - GCC and Clang builds,
 - AddressSanitizer,
 - UndefinedBehaviorSanitizer,
@@ -526,6 +545,45 @@ make -C tests tidy
 make -C tests memcheck
 make -C tests sharp
 ```
+
+### Floating-Point Comparison
+
+Finite floating-point values are compared with:
+
+```text
+abs(golden - actual)
+<= 1e-12
++ 1e-9 * max(abs(golden), abs(actual))
+```
+
+The values are serialized with the exact hexadecimal `%a` representation
+before comparison. The numerical tolerance accommodates small differences
+between supported compilers and platforms, including Linux/GCC and
+Windows/MSYS2/GCC.
+
+Tags, record structure, dimensions, integer values, Boolean values, diagnostic
+text, record order, and the total record count are compared exactly.
+
+The tolerances are not intended to hide algorithmic changes.
+
+### Skipped Optional Checks
+
+Some sanitizer targets require runtime libraries that are not available in
+every compiler installation. In that case, the Makefile prints a warning such
+as:
+
+```text
+WARNING: san-gcc NOT RUN - the address/undefined sanitizer runtime
+(libasan/libubsan) is not installed for g++.
+```
+
+The remaining checks continue to run.
+
+`TEST OVERALL: PASSED` means that all checks actually executed passed. It does
+not mean that every optional sanitizer or analysis target was executed.
+
+Before a release, sanitizer checks should pass on at least one supported
+environment where the required runtime libraries are available.
 
 See the User Manual and [`CONTRIBUTING.md`](CONTRIBUTING.md) for details.
 

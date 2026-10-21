@@ -309,6 +309,93 @@ checks.
 
 ---
 
+## Floating-Point Regression Comparison
+
+Scenario values are serialized with the C `%a` format. This preserves the
+exact binary `double` value without decimal-formatting ambiguity.
+
+Finite floating-point values are compared using:
+
+```text
+abs(golden - actual)
+<= 1e-12
++ 1e-9 * max(abs(golden), abs(actual))
+```
+
+The complete record prefix before the final `|` separator must match exactly.
+Captured console records, tags, dimensions, integer values, Boolean values,
+diagnostic text, record order, and record count are compared exactly.
+
+NaN values are accepted only if the complete serialized records match.
+Infinite values must agree in classification and sign.
+
+The tolerance accommodates small differences between compilers,
+mathematical libraries, floating-point evaluation orders, and platforms. It
+must not be increased merely to make a failing test pass.
+
+When a numerical test fails:
+
+1. inspect the affected scenario and value,
+2. determine the absolute and relative difference,
+3. compare the result with another supported compiler or platform,
+4. determine whether the change is expected,
+5. update the golden reference only for an intended behavior change,
+6. change the tolerances only with documented numerical justification.
+
+---
+
+## Skipped Optional Checks
+
+Some sanitizer and analysis targets require runtime components that are not
+available in every compiler installation.
+
+If a required optional runtime is unavailable, the test Makefile may print a
+warning such as:
+
+```text
+WARNING: san-gcc NOT RUN - the address/undefined sanitizer runtime
+(libasan/libubsan) is not installed for g++.
+```
+
+The remaining available checks continue to run.
+
+`TEST OVERALL: PASSED` means that every check actually executed passed. It
+does not mean that every optional check was executed.
+
+A skipped sanitizer target provides no sanitizer result and must not be
+reported as a successful sanitizer run.
+
+Before a release, sanitizer checks should pass on at least one supported
+environment where the required runtimes are available.
+
+---
+
+## Optional MSYS2 Developer Tools
+
+Ordinary use, object-file builds, the optional static archive, and the example
+program do not require Clang.
+
+For the Clang compiler and clang-tidy targets in MSYS2 UCRT64, install:
+
+```bash
+pacman -S --needed \
+mingw-w64-ucrt-x86_64-clang \
+mingw-w64-ucrt-x86_64-clang-tools-extra
+```
+
+Check the installation with:
+
+```bash
+clang++ --version
+clang-tidy --version
+```
+
+These packages do not necessarily provide every sanitizer runtime used by the
+test Makefile. If `compiler-rt`, `libasan`, or `libubsan` is unavailable, the
+affected sanitizer target is reported as `NOT RUN`.
+
+---
+
 ## Adding a Regression Scenario
 
 A behavioral change, defect correction, or new public method should normally
@@ -424,6 +511,32 @@ make -C tests san-clang
 The normal regression target must compare against the existing committed
 reference. It must not regenerate the reference automatically before the
 comparison.
+
+---
+
+## Floating-Point Regression Comparison
+
+Floating-point scenario values are serialized with the C `%a` format. This
+preserves the exact stored binary `double` value without decimal formatting
+ambiguity.
+
+The regression comparison is intentionally tolerant across compilers and
+platforms. Finite values are compared using the configured absolute and
+relative tolerances. Structural data, tags, sizes, integer values, Boolean
+values, and message text remain subject to exact comparison.
+
+The tolerance exists to accommodate small differences between platforms such
+as Linux/GCC and Windows/MSYS2/GCC. It must not be used to hide an unexplained
+algorithmic change.
+
+When a numerical test fails:
+
+1. inspect the affected scenario and value,
+2. determine the absolute and relative difference,
+3. compare the result on another supported compiler or platform,
+4. decide whether the change is expected,
+5. update the reference only for an intended behavioral change,
+6. change the tolerances only when there is a documented numerical reason.
 
 ---
 
@@ -582,14 +695,24 @@ Before submitting a change, verify:
 - [ ] Units, normalizations, signs, and reference conditions are explicit.
 - [ ] Input validation has not been weakened.
 - [ ] NaN, infinity, vector dimensions, point counts, and ordering are handled
-where relevant.
+      where relevant.
 - [ ] Important status values are checked.
 - [ ] Failure paths do not expose unintended partial results.
 - [ ] Invalidated derived data are cleared or recomputed.
 - [ ] A focused regression scenario covers the change.
 - [ ] Relevant invalid and boundary inputs are tested.
-- [ ] GCC and Clang regression tests pass.
-- [ ] Relevant sanitizer and static-analysis checks pass.
+- [ ] GCC and Clang regression comparisons pass where available.
+- [ ] Linux and Windows results were compared where practical.
+- [ ] Floating-point differences satisfy
+      `abs(golden - actual) <= 1e-12 + 1e-9 * max(abs(golden), abs(actual))`.
+- [ ] Test tolerances were not increased without documented numerical
+      justification.
+- [ ] NaN, infinity, signed infinity, and near-zero comparison behavior were
+      considered.
+- [ ] Skipped optional checks were reviewed and reported.
+- [ ] Sanitizer checks ran successfully on at least one suitable environment
+      for release-critical changes.
+- [ ] Relevant static-analysis checks pass.
 - [ ] Golden-reference differences have been reviewed.
 - [ ] API classification is clear.
 - [ ] Public API documentation matches the current header.
