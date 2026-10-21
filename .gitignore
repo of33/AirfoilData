@@ -55,5 +55,12 @@ run/*
 tmp/
 temp/
 
+# Test harness byproducts (written by scenarioSave / coverage runs)
+tests/harness_saved.dat
+tests/harness_should_not_exist.dat
+*.gcov
+*.gcno
+*.gcda
+
 *.kate-swp
 *.swp

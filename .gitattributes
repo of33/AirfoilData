@@ -1,0 +1,6 @@
+# Byte-identical checkouts on every platform: the golden reference and the
+# test/example data files are compared and parsed line-wise, so they must
+# keep LF endings even when core.autocrlf=true (Windows runners).
+*.txt text eol=lf
+*.dat text eol=lf
+*.gnu text eol=lf

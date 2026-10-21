@@ -40,7 +40,15 @@ int main(int argc, char** argv)
     std::vector<std::string> goldenLines;
     std::string line;
     while (std::getline(goldenFile, line))
+    {
+        // Tolerate CRLF checkouts (Windows core.autocrlf=true): the emitted
+        // lines always use '\n' only.
+        if (!line.empty() && line.back() == '\r')
+        {
+            line.pop_back();
+        }
         goldenLines.push_back(line);
+    }
 
     CollectSink sink;
     runAllScenarios(sink, profilePath);
